@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  productservice:
+    build:
+      context: .
+      dockerfile: ProductService/Dockerfile
+    ports:
+      - "5002:8080"
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  productwebapp:
+    build:
+      context: .
+      dockerfile: ProductWebApp/Dockerfile
+    ports:
+      - "5003:8080"
+    depends_on:
+      - productservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ProductService__BaseUrl=http://productservice:8080
+
+volumes:
+  mongo-data:

@@ -1,0 +1,2 @@
+﻿docker build -t aungpwin22/productwebapp -f Dockerfile .
+docker push aungpwin22/productwebapp

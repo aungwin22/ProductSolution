@@ -1,0 +1,21 @@
+# Use the official .NET 8 SDK as a build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy csproj and restore as distinct layers
+COPY ProductService/ProductService.csproj ProductService/
+RUN dotnet restore ProductService/ProductService.csproj
+
+# Copy everything else and build
+COPY ProductService/. ProductService/
+WORKDIR /src/ProductService
+RUN dotnet build -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish -c Release -o /app/publish
+
+# Use the official ASP.NET Core runtime as a runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "ProductService.dll"]
